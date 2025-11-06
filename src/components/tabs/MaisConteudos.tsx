@@ -4,23 +4,23 @@ export default function MaisConteudos() {
   const products = [
     {
       id: 1,
-      title: 'Rotinas Imprimíveis',
-      subtitle: 'Hora de Dormir',
-      description: 'Guias práticos e rotinas estruturadas para otimizar seu descanso e recuperação muscular.',
-      image: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=800',
-      price: 'R$ 47,00',
+      title: 'Protocolo de Treino',
+      subtitle: 'Para Todos os Níveis',
+      description: 'Sistema completo de periodização com fichas prontas para iniciantes, intermediários e avançados. Evolua de forma segura e eficiente.',
+      image: 'https://images.pexels.com/photos/3490348/pexels-photo-3490348.jpeg?auto=compress&cs=tinysrgb&w=800',
+      price: 'R$ 97,00',
       link: '#',
-      badge: 'Novo'
+      badge: 'Completo'
     },
     {
       id: 2,
-      title: 'Consultoria Express',
-      subtitle: 'Avaliação personalizada',
-      description: 'Análise completa do seu treino atual + plano personalizado de evolução.',
-      image: 'https://images.pexels.com/photos/6551415/pexels-photo-6551415.jpeg?auto=compress&cs=tinysrgb&w=800',
-      price: 'R$ 197,00',
+      title: 'Pack de Execuções Perfeitas',
+      subtitle: 'Para Nunca Mais Errar',
+      description: 'Guia visual detalhado com vídeos de todos os exercícios fundamentais, biomecânica correta e erros mais comuns a evitar.',
+      image: 'https://images.pexels.com/photos/4162449/pexels-photo-4162449.jpeg?auto=compress&cs=tinysrgb&w=800',
+      price: 'R$ 147,00',
       link: '#',
-      badge: 'Exclusivo'
+      badge: 'Premium'
     }
   ];
 
@@ -89,10 +89,10 @@ export default function MaisConteudos() {
             </div>
             <div>
               <h3 className="text-foreground font-bold text-lg mb-2">
-                Pacote Completo Premium
+                Combo Master de Treino
               </h3>
               <p className="text-muted-foreground mb-4">
-                Adquira os dois produtos juntos e ganhe 30% de desconto + bônus exclusivos.
+                Adquira o protocolo completo + pack de execuções e ganhe 35% de desconto + acesso vitalício a atualizações.
               </p>
               <a
                 href="#"

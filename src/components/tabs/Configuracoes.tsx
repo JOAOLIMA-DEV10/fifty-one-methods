@@ -1,25 +1,51 @@
-import { useState } from 'react';
-import { User } from '../../types';
-import { LogOut, Save, User as UserIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, User as UserIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
-interface ConfiguracoesProps {
-  user: User;
-  onUpdateUser: (user: User) => void;
-  onLogout: () => void;
-}
+export default function Configuracoes() {
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export default function Configuracoes({ user, onUpdateUser, onLogout }: ConfiguracoesProps) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [phone, setPhone] = useState(user.phone);
-  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    // Get current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    onUpdateUser({ name, email, phone });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('Logout realizado com sucesso!');
+    navigate('/login');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-24 pt-6 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24 pt-6 px-4">
@@ -35,74 +61,35 @@ export default function Configuracoes({ user, onUpdateUser, onLogout }: Configur
               <UserIcon className="w-10 h-10 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-foreground font-bold text-xl">{user.name}</h2>
-              <p className="text-muted-foreground text-sm">{user.email}</p>
+              <h2 className="text-foreground font-bold text-xl">Minha Conta</h2>
+              <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
           </div>
 
-          <form onSubmit={handleSave} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                Nome completo
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition-colors"
-                required
-              />
+          <div className="space-y-4">
+            <div className="bg-background rounded-lg p-4">
+              <p className="text-sm font-medium text-foreground mb-1">Email cadastrado</p>
+              <p className="text-muted-foreground text-sm">{user?.email}</p>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition-colors"
-                required
-              />
+            <div className="bg-background rounded-lg p-4">
+              <p className="text-sm font-medium text-foreground mb-1">ID da conta</p>
+              <p className="text-muted-foreground text-sm break-all">{user?.id}</p>
             </div>
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-                Telefone
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:border-primary transition-colors"
-                required
-              />
+            <div className="bg-background rounded-lg p-4">
+              <p className="text-sm font-medium text-foreground mb-1">Conta criada em</p>
+              <p className="text-muted-foreground text-sm">
+                {user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : 'N/A'}
+              </p>
             </div>
-
-            {saved && (
-              <div className="bg-secondary/10 border border-secondary text-secondary px-4 py-3 rounded-lg text-sm">
-                Alterações salvas com sucesso!
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full bg-secondary hover:bg-primary text-secondary-foreground hover:text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <Save className="w-5 h-5" />
-              Salvar alterações
-            </button>
-          </form>
+          </div>
         </div>
 
         <div className="bg-card rounded-2xl p-6">
           <h3 className="text-foreground font-bold text-lg mb-4">Zona de perigo</h3>
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-semibold py-3 px-6 rounded-lg transition-all duration-300 flex items-center justify-center gap-2"
           >
             <LogOut className="w-5 h-5" />

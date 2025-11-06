@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
-import Login from '../components/Login';
 import Navigation from '../components/Navigation';
 import Principal from '../components/tabs/Principal';
 import ModuleDetail from '../components/tabs/ModuleDetail';
 import ContinuarAssistindo from '../components/tabs/ContinuarAssistindo';
 import MaisConteudos from '../components/tabs/MaisConteudos';
 import Configuracoes from '../components/tabs/Configuracoes';
+import AuthGuard from '../components/AuthGuard';
 import { modules } from '../data/modules';
-import { Module, Lesson, User } from '../types';
+import { Module, Lesson } from '../types';
 
 const Index = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('principal');
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
@@ -19,11 +18,6 @@ const Index = () => {
     lesson: Lesson;
     progress: number;
   } | null>(null);
-  const [user, setUser] = useState<User>({
-    name: 'Cliente 713',
-    email: 'cliente713@academia.com',
-    phone: '(11) 99999-9999'
-  });
 
   useEffect(() => {
     const saved = localStorage.getItem('completedLessons');
@@ -45,16 +39,6 @@ const Index = () => {
       }
     }
   }, []);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setActiveTab('principal');
-    setSelectedModule(null);
-  };
 
   const handleModuleSelect = (moduleId: number) => {
     const module = modules.find(m => m.id === moduleId);
@@ -91,46 +75,34 @@ const Index = () => {
     }
   };
 
-  const handleUpdateUser = (updatedUser: User) => {
-    setUser(updatedUser);
-  };
-
-  if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      {selectedModule ? (
-        <ModuleDetail
-          module={selectedModule}
-          onBack={handleBackToModules}
-          onLessonComplete={handleLessonComplete}
-          completedLessons={completedLessons}
-        />
-      ) : (
-        <>
-          {activeTab === 'principal' && (
-            <Principal modules={modules} onModuleSelect={handleModuleSelect} />
-          )}
-          {activeTab === 'continuar' && (
-            <ContinuarAssistindo
-              lastWatched={lastWatched}
-              onContinue={handleContinueWatching}
-            />
-          )}
-          {activeTab === 'conteudos' && <MaisConteudos />}
-          {activeTab === 'config' && (
-            <Configuracoes
-              user={user}
-              onUpdateUser={handleUpdateUser}
-              onLogout={handleLogout}
-            />
-          )}
-        </>
-      )}
-      {!selectedModule && <Navigation activeTab={activeTab} onTabChange={setActiveTab} />}
-    </div>
+    <AuthGuard>
+      <div className="min-h-screen bg-background">
+        {selectedModule ? (
+          <ModuleDetail
+            module={selectedModule}
+            onBack={handleBackToModules}
+            onLessonComplete={handleLessonComplete}
+            completedLessons={completedLessons}
+          />
+        ) : (
+          <>
+            {activeTab === 'principal' && (
+              <Principal modules={modules} onModuleSelect={handleModuleSelect} />
+            )}
+            {activeTab === 'continuar' && (
+              <ContinuarAssistindo
+                lastWatched={lastWatched}
+                onContinue={handleContinueWatching}
+              />
+            )}
+            {activeTab === 'conteudos' && <MaisConteudos />}
+            {activeTab === 'config' && <Configuracoes />}
+          </>
+        )}
+        {!selectedModule && <Navigation activeTab={activeTab} onTabChange={setActiveTab} />}
+      </div>
+    </AuthGuard>
   );
 };
 
